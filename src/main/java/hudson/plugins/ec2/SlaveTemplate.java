@@ -1873,9 +1873,13 @@ public class SlaveTemplate implements Describable<SlaveTemplate> {
      * Safely we can pickup only instance that is not known by Jenkins at all.
      */
     private boolean checkInstance(Instance instance) {
+        if(!instance.state().name().equals(InstanceStateName.STOPPED)){
+            logInstanceCheck(instance, " false - Instance is not in stopped state: " + instance.state().name());
+            return false;
+        }
+
         for (EC2AbstractSlave node : NodeIterator.nodes(EC2AbstractSlave.class)) {
-            if ((node.getInstanceId().equals(instance.instanceId()))
-                    && (!(instance.state().name().equals(InstanceStateName.STOPPED)))) {
+            if ((node.getInstanceId().equals(instance.instanceId()))) {
                 logInstanceCheck(
                         instance, ". false - found existing corresponding Jenkins agent: " + node.getInstanceId());
                 return false;
